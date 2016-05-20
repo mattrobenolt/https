@@ -1,4 +1,4 @@
-# https
+# $ https
 
 A little https proxy with no frills for local development. Generates a self-signed certificate on-demand.
 
