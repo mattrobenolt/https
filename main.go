@@ -27,12 +27,12 @@ var listen = flag.String("listen", "127.0.0.1:8443", "")
 
 func usage() {
 	prog := os.Args[0]
-	fmt.Fprintf(os.Stderr, "usage: %s [-host=<hostname>] [upstream]\n", prog)
-	fmt.Fprintf(os.Stderr, "version: %s", Version)
-	fmt.Fprint(os.Stderr, "\n")
+	fmt.Fprintf(os.Stderr, "usage: %s [-host=<hostname>] [-listen=<address>] [upstream]\n", prog)
+	fmt.Fprintf(os.Stderr, "version: %s\n", Version)
 	fmt.Fprint(os.Stderr, "examples:\n")
-	fmt.Fprintf(os.Stderr, "    %s 8000  # create proxy to localhost:8000\n", prog)
-	fmt.Fprintf(os.Stderr, "    %s -host=example.dev 9000\n", prog)
+	fmt.Fprintf(os.Stderr, "    %s 8000                # create proxy to localhost:8000\n", prog)
+	fmt.Fprintf(os.Stderr, "    %s -host=foo.dev 9000  # generate a cert for foo.dev:9000\n", prog)
+	fmt.Fprintf(os.Stderr, "    %s -listen=:8888       # listen on port 8888\n", prog)
 }
 
 func usageAndExit(s string) {
@@ -148,6 +148,11 @@ func main() {
 		args = append(args, DefaultUpstream)
 	}
 
+	listenAddr, err := net.ResolveTCPAddr("tcp", *listen)
+	if err != nil {
+		usageAndExit("failed to parse -listen")
+	}
+
 	upstream := args[0]
 	if !strings.Contains(upstream, ":") {
 		upstream = "127.0.0.1:" + upstream
@@ -169,7 +174,11 @@ func main() {
 
 	fmt.Println("upstream: " + upstream)
 	fmt.Println("listen:   " + *listen)
-	fmt.Println("proxy:    https://" + *host + ":8443/")
+	if listenAddr.Port == 443 {
+		fmt.Println(fmt.Sprintf("proxy:    https://%s/", *host))
+	} else {
+		fmt.Println(fmt.Sprintf("proxy:    https://%s:%d/", *host, listenAddr.Port))
+	}
 	fmt.Println("")
 	fmt.Println("==> let's go!")
 	log.Fatal(http.ListenAndServeTLS(*listen, cert, key, proxy))
