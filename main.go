@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-const Version = "0.0.0"
+const Version = "0.1.0"
 const DefaultUpstream = "8000"
 
 var host = flag.String("host", "localhost", "")
