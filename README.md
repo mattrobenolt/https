@@ -27,4 +27,5 @@ $ go get github.com/mattrobenolt/https
 ```bash
 $ https 8080
 $ https -host=example.dev 9000
+$ https -listen=:8888
 ```
